@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <body>
+    <script>
+      const { ipcRenderer: ipc } = require("electron");
+
+      const remote = window.require("@electron/remote");
+      const { BrowserWindow } = remote;
+      let parentWin = {};
+
+      const basePath = remote.app.getAppPath();
+      const path = require("path");
+      const fs = require("fs-extra");
+      const winex = require("win-explorer");
+
+      const db = require(path.join(basePath, "Models"));
+      const jobs = [];
+      let fileTypes = [];
+
+      const send = (e, d) => {
+        parentWin.webContents?.send(e, d);
+      };
+
+      const filterFile = (f) => {
+        return !f.IsDirectory && fileTypes?.includes(f.Extension.toLocaleLowerCase());
+      };
+
+      const AddFolder = async (file, DirectoryId) => {
+        const mapFile = (file) => {
+          file.Dir = path.dirname(file.Path);
+          return { ...file, DirectoryId };
+        };
+
+        const files = winex.ListFiles(file.Path);
+
+        if (files.length) {
+          const Files = files.filter(filterFile).map(mapFile);
+          const folders = files.filter((f) => f.IsDirectory);
+
+          try {
+            //if folder contain require file create folder and file in the db
+            if (Files.length) {
+              await db.File.bulkCreate(Files);
+            }
+          } catch (error) {
+            console.log(error, file);
+            send("error", { error, DirName: file.Name, DirectoryId });
+          }
+          // if folder contain folders scan recursive
+
+          if (folders.length) {
+            for (const folder of folders) {
+              await AddFolder(folder, DirectoryId);
+            }
+          }
+        }
+      };
+
+      const dirScan = async () => {
+        while (jobs.length) {
+          const Id = jobs.pop();
+          const dir = await db.Directory.findOne({ where: { Id } });
+          try {
+            if (dir) {
+              await db.File.destroy({ where: { Dir: { [db.Op.like]: `%${dir.Path}%` } } });
+              let file = { Name: dir.Name, Path: dir.Path };
+              await AddFolder(file, dir.Id);
+            }
+          } catch (error) {
+            console.log(error);
+            send("error", { error });
+          }
+          send("removeJob", Id);
+          send("job-done", Id);
+        }
+      };
+      let working = false;
+
+      ipc.on("new-job", (e, { Id, winId, types }) => {
+        fileTypes = types || [];
+        if (!parentWin.webContents) parentWin = BrowserWindow.fromId(winId);
+        jobs.push(Id);
+        if (!working) {
+          working = true;
+          dirScan().then(() => {
+            working = false;
+            console.log("done");
+            send("all-jobs-done");
+            window.close();
+          });
+        }
+      });
+      window.addEventListener("beforeunload", () => send("all-jobs-done"));
+    </script>
+  </body>
+</html>
