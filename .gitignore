@@ -28,3 +28,4 @@ dist-ssr
 /electron/yarn/*
 /electron/build
 /electron/dist
+yarn.*
