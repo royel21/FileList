@@ -30,6 +30,7 @@ const TitleBar = () => {
         <input type="checkbox" name="" id="always-top" onChange={setAlwaysOnTop} />
         <i className="far fa-window-restore"></i>
       </label>
+      <span className="files-count"></span>
       <div id="title-n">
         <h5 className="title">Files List</h5>
         <div id="drag-region"></div>

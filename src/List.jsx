@@ -87,6 +87,10 @@ const List = ({ filter, setFilter }) => {
     return () => (isMounted = false);
   }, []);
 
+  useEffect(() => {
+    document.querySelector(".files-count").textContent = datas.count || "";
+  });
+
   return (
     <div id="list">
       {showBrw && <ModalBrowser hide={() => setShowBrw()} current={filter} setFilter={(flt) => load(flt, 0)} />}
@@ -127,7 +131,6 @@ const List = ({ filter, setFilter }) => {
           <span className="clear-icon fas fa-times-circle" onClick={clear}></span>
         </div>
         <Pager data={datas} setData={loadPage} />
-        <span id="count">{datas.count}</span>
       </div>
     </div>
   );
