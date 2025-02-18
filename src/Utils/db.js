@@ -95,11 +95,10 @@ export const getJobs = () => {
 export const addDirectory = async (d) => {
   let isNew = false;
   try {
-    if (fs.readdirSync(d.Path).length) {
-      let directory = await db.Directory.findOne({ where: { Path: d.Path } });
+    let directory = await db.Directory.findOne({ where: { Path: d.Path } });
+    if (fs.readdirSync(d.Path).length || directory) {
       if (!directory) {
         directory = await db.Directory.create(d);
-        console.log("create");
         isNew = true;
       }
 

@@ -29,3 +29,4 @@ dist-ssr
 /electron/build
 /electron/dist
 yarn.*
+test.js

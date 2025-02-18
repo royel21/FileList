@@ -62,9 +62,9 @@
           const dir = await db.Directory.findOne({ where: { Id } });
           try {
             if (dir) {
-              await db.File.destroy({ where: { Dir: { [db.Op.like]: `%${dir.Path}%` } } });
+              await db.File.destroy({ where: { DirectoryId: Id } });
               let file = { Name: dir.Name, Path: dir.Path };
-              await AddFolder(file, dir.Id);
+              await AddFolder(file, Id);
             }
           } catch (error) {
             console.log(error);
