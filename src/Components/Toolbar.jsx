@@ -1,5 +1,5 @@
 import { getPreviewWin } from "../Utils/Preview";
-import { mainWindow } from "../Utils/utils";
+import { mainWindow, ver } from "../Utils/utils";
 
 const TitleBar = () => {
   const closeWindow = () => {
@@ -32,7 +32,7 @@ const TitleBar = () => {
       </label>
       <div id="title-n">
         <span className="files-count"></span>
-        <h5 className="title">Files List</h5>
+        <h5 className="title">Files List -{ver}</h5>
         <div id="drag-region"></div>
       </div>
       <span className="btn-sys" onClick={minWindow}>

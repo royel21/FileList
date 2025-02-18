@@ -9,8 +9,11 @@ export const basePath = remote.app.getAppPath();
 export const path = window.require("path");
 export const fs = window.require("fs-extra");
 export const os = window.require("os");
+const pck = fs.readJSONSync(path.join(basePath, "package.json"));
 
 const { dialog } = remote;
+
+export const ver = pck.version;
 
 export const DevMode = remote.getGlobal("process").env.NODE_ENV?.trim() === "dev842764";
 
